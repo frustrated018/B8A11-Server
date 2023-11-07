@@ -10,9 +10,7 @@ app.use(express.json());
 
 // MONGO DB CONNECTION
 
-console.log(process.env.DB_USER);
-
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.hq7fxqk.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -27,22 +25,29 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    // await client.connect();
+    await client.connect();
 
     // BACKEND CODE STARTS HERE
 
     const roomCollection = client.db("yachiyoDB").collection("rooms");
 
     // Finding all the rooms
-
     app.get("/rooms", async (req, res) => {
       const cursor = roomCollection.find();
       const result = await cursor.toArray();
       res.send(result);
     });
 
+    // Finding rooms by id
+    app.get("/rooms/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await roomCollection.findOne(query);
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
-    // await client.db("admin").command({ ping: 1 });
+    await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
