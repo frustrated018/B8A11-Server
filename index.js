@@ -38,8 +38,15 @@ async function run() {
       res.send(result);
     });
 
-    // Finding rooms by id
-    app.get("/rooms/:id", async (req, res) => {
+    // Finding rooms by id for booking
+    app.get("/rooms/details/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await roomCollection.findOne(query);
+      res.send(result);
+    });
+    // Finding rooms by id for chekout
+    app.get("/rooms/checkout/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await roomCollection.findOne(query);
