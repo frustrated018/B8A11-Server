@@ -32,6 +32,8 @@ async function run() {
     const roomCollection = client.db("yachiyoDB").collection("rooms");
     const bookingCollection = client.db("yachiyoDB").collection("bookings");
 
+    // Featured section related API
+
     // Room related API
     // Finding all the rooms
     app.get("/rooms", async (req, res) => {
@@ -56,6 +58,36 @@ async function run() {
     });
 
     // Booking related API
+
+    // Update the seats when a booking is made
+    app.put("/rooms/checkout/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const room = await roomCollection.findOne(query);
+
+      if (!room) {
+        res.status(404).json({ error: "Room not found" });
+        return;
+      }
+
+      if (room.seats === 0) {
+        res.status(400).json({ error: "No seats available" });
+        return;
+      }
+
+      // Decrement the available seats by 1
+      const updatedSeats = room.seats - 1;
+
+      // Update the room document in the database with the new number of seats
+      const update = { $set: { seats: updatedSeats } };
+      const result = await roomCollection.updateOne(query, update);
+
+      if (result.modifiedCount === 1) {
+        res.status(200).json({ message: "Booking successful" });
+      } else {
+        res.status(500).json({ error: "Booking failed" });
+      }
+    });
 
     // sorting Booking by email
     app.get("/bookings", async (req, res) => {
@@ -86,13 +118,11 @@ async function run() {
     app.put("/bookings/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
-      const { newDate } = req.body; 
+      const { newDate } = req.body;
       const update = { $set: { date: newDate } };
       const result = await bookingCollection.updateOne(query, update);
       res.send(result);
     });
-
-
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
