@@ -57,23 +57,37 @@ async function run() {
 
     // Booking related API
 
+    // sorting Booking by email
     app.get("/bookings", async (req, res) => {
-      // sorting Booking by email
       let query = {};
       if (req.query?.email) {
         query = { email: req.query.email };
       }
-
       const result = await bookingCollection.find(query).toArray();
       res.send(result);
     });
 
+    // Inserting items into bookings
     app.post("/bookings", async (req, res) => {
       const order = req.body;
       const result = await bookingCollection.insertOne(order);
       res.send(result);
     });
 
+    // Deleting booking
+    app.delete("/bookings/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await bookingCollection.deleteOne(query);
+      res.send(result);
+    });
+
+
+
+
+
+
+    
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
