@@ -168,16 +168,22 @@ async function run() {
 
     // Reviews related API
 
-    app.get('/reviews', async(req,res)=>{
-      const cursor = reviewCollection.find();
-      const result = await cursor.toArray();
+    app.get("/reviews", async (req, res) => {
+      const id = req.query.roomId;
+      let query = {};
+      if (req.query?.roomId) {
+         query = { idx: parseInt(id) };
+      }
+      const result = await reviewCollection.find(query).toArray();
       res.send(result);
-    })
+    });
 
-
-
-
-
+     // Adding reviews to the site
+     app.post("/reviews", async (req, res) => {
+      const newReview = req.body;
+      const result = await reviewCollection.insertOne(newReview);
+      res.send(result);
+    });
 
 
 
